@@ -116,3 +116,29 @@ async def fetch_monthly(since, upto):
         monthly_data.append(__sum_data_on_month(month, daily_data))
 
     return monthly_data
+
+async def fetch_monthly_on_year(year, since, upto):
+    async with aiohttp.ClientSession() as session:
+        case_data = await __get_case_data(session)
+
+    case_year = int(year)
+
+    daily_data = case_data["update"]["harian"]
+
+    cases_on_year = list(filter(lambda data: parse_year(data["key"]) == case_year, daily_data ))
+
+    months = sorted(
+        set(
+            map(
+                lambda data: str(f"{parse_year(data['key'])}-{parse_month(data['key']):02d}"),
+                cases_on_year
+            )
+        )
+    )
+    
+    monthly_data = []
+
+    for month in months:
+        monthly_data.append(__sum_data_on_month(month, cases_on_year))
+
+    return monthly_data
