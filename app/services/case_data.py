@@ -55,6 +55,22 @@ def __sum_data_on_month(month: str, cases):
         "active": active
     }
 
+def __sum_data(cases):
+    positive = sum([case["jumlah_positif"]["value"] for case in cases])
+    recovered = sum([case["jumlah_sembuh"]["value"] for case in cases])
+    deaths = sum([case["jumlah_meninggal"]["value"] for case in cases])
+
+    # active cases still in doubt because of negative value
+    active = sum([case["jumlah_dirawat"]["value"] for case in cases if case["jumlah_dirawat"]["value"] > 0])
+
+    return {
+        "positive": positive,
+        "recovered": recovered,
+        "deaths": deaths,
+        "active": active
+    }
+
+
 async def fetch_yearly(since, upto):
     yearly_since, yearly_upto = None, None
 
@@ -142,3 +158,27 @@ async def fetch_monthly_on_year(year, since, upto):
         monthly_data.append(__sum_data_on_month(month, cases_on_year))
 
     return monthly_data
+
+async def fetch_monthly_on_year_month(year, month):
+    async with aiohttp.ClientSession() as session:
+        case_data = await __get_case_data(session)
+
+    daily_data = case_data["update"]["harian"]
+
+    case_year = int(year)
+    case_month = int(month)
+
+
+    cases_on_year = list(filter(lambda data: parse_year(data["key"]) == case_year, daily_data ))
+    cases_on_month = list(filter(lambda data: parse_month(data["key"]) == case_month, cases_on_year ))
+
+    month_string = f"{int(year)}-{int(month):02d}"
+
+    data = __sum_data(cases_on_month)
+
+    return {
+        "month": month_string,
+        **data
+    }
+
+
