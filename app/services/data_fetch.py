@@ -57,7 +57,7 @@ async def fetch_yearly_data():
         deaths = sum([case["jumlah_meninggal"]["value"] for case in cases_on_year])
 
         # active cases still in doubt because of negative value
-        active = sum([case["jumlah_dirawat"]["value"] for case in cases_on_year])
+        active = sum([case["jumlah_dirawat"]["value"] for case in cases_on_year if case["jumlah_dirawat"]["value"] > 0])
 
         yearly_data.append({
             "year": str(year),
