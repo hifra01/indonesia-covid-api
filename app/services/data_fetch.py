@@ -14,6 +14,10 @@ async def __get_vaccine_data(session: aiohttp.ClientSession):
         data = await response.json()
     return data
 
+def __parse_year(key: int):
+        timestamp = key/1000
+        return datetime.utcfromtimestamp(timestamp).year
+
 async def fetch_total_data():
     
     async with aiohttp.ClientSession() as session:
@@ -48,10 +52,6 @@ async def fetch_yearly_data(since, upto):
     if upto != None:
          if re.match(r"\d{4}", upto):
              yearly_upto = int(upto)
-
-    def __parse_year(key: int):
-        timestamp = key/1000
-        return datetime.utcfromtimestamp(timestamp).year
     
     async with aiohttp.ClientSession() as session:
         case_data = await __get_case_data(session)
@@ -85,5 +85,27 @@ async def fetch_yearly_data(since, upto):
         })
 
     return yearly_data
+
+async def fetch_yearly_data_on_year(year):
+
+    async with aiohttp.ClientSession() as session:
+        case_data = await __get_case_data(session)
+        vaccine_data = await __get_vaccine_data(session)
+
+    cases_on_year = list(filter(lambda case: __parse_year(case["key"]) == year, case_data["update"]["harian"]))
+    positive = sum([case["jumlah_positif"]["value"] for case in cases_on_year])
+    recovered = sum([case["jumlah_sembuh"]["value"] for case in cases_on_year])
+    deaths = sum([case["jumlah_meninggal"]["value"] for case in cases_on_year])
+
+    # active cases still in doubt because of negative value
+    active = sum([case["jumlah_dirawat"]["value"] for case in cases_on_year if case["jumlah_dirawat"]["value"] > 0])
+
+    return {
+            "year": str(year),
+            "positive": positive,
+            "recovered": recovered,
+            "deaths": deaths,
+            "active": active
+        }
         
 
