@@ -1,4 +1,5 @@
 import aiohttp
+import re
 from datetime import datetime
 from functools import reduce
 from app.configs import datasource
@@ -36,7 +37,17 @@ async def fetch_total_data():
 
     return data
 
-async def fetch_yearly_data():
+async def fetch_yearly_data(since, upto):
+    
+    yearly_since, yearly_upto = None, None
+
+    if since != None:
+         if re.match(r"\d{4}", since):
+             yearly_since = int(since)
+
+    if upto != None:
+         if re.match(r"\d{4}", upto):
+             yearly_upto = int(upto)
 
     def __parse_year(key: int):
         timestamp = key/1000
@@ -49,6 +60,12 @@ async def fetch_yearly_data():
     yearly_data = []
 
     years = set(map(lambda data: __parse_year(data["key"]), case_data["update"]["harian"]))
+
+    if yearly_since != None:
+        years = list(filter(lambda year: year >= yearly_since, years))
+
+    if yearly_upto != None:
+        years = list(filter(lambda year: year <= yearly_upto, years))
     
     for year in years:
         cases_on_year = list(filter(lambda case: __parse_year(case["key"]) == year, case_data["update"]["harian"]))
