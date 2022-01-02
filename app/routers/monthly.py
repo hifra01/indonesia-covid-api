@@ -30,4 +30,3 @@ async def get_monthly_data_on_year_month(year: str, month: str):
         "message": "Data fetched successfully",
         "data": case_data
     }
-    return
