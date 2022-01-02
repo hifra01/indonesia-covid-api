@@ -1,4 +1,4 @@
-from datetime import datetime,  timezone
+from datetime import datetime, timezone
 
 def parse_full_date_to_milliseconds(date: str):
     date_splitted = date.split(".")
@@ -11,3 +11,10 @@ def parse_full_date_to_milliseconds(date: str):
     milliseconds = new_date.timestamp() * 1000
 
     return milliseconds
+
+def parse_year_month_to_tuple(year_month):
+    year_month_splitted = year_month.split(".")
+    year = int(year_month_splitted[0])
+    month = int(year_month_splitted[1])
+
+    return (year, month)
