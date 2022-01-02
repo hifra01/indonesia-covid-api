@@ -102,14 +102,15 @@ async def fetch_yearly(since, upto):
 
     return yearly_data
 
-async def fetch_yearly_on_year(year: int):
+async def fetch_yearly_on_year(year: str):
+    year_int = int(year)
 
     async with aiohttp.ClientSession() as session:
         case_data = await __get_case_data(session)
     
     daily_data = case_data["update"]["harian"]
 
-    return __sum_data_on_year(year, daily_data)
+    return __sum_data_on_year(year_int, daily_data)
 
 async def fetch_monthly(since, upto):
     async with aiohttp.ClientSession() as session:
