@@ -7,3 +7,7 @@ def parse_year(key: int):
 def parse_month(key: int):
     timestamp = key/1000
     return datetime.utcfromtimestamp(timestamp).month
+
+def parse_day(key: int):
+    timestamp = key/1000
+    return datetime.utcfromtimestamp(timestamp).day

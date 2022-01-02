@@ -3,7 +3,7 @@ import re
 
 from functools import reduce
 from app.configs import datasource
-from app.utils.utils import parse_year, parse_month
+from app.utils.utils import parse_year, parse_month, parse_day
 
 async def __get_case_data(session: aiohttp.ClientSession):
     async with session.get(datasource.case_update_url) as response:
@@ -180,5 +180,44 @@ async def fetch_monthly_on_year_month(year, month):
         "month": month_string,
         **data
     }
+
+async def fetch_daily(since, upto):
+    async with aiohttp.ClientSession() as session:
+        case_data = await __get_case_data(session)
+
+    daily_data = case_data["update"]["harian"]
+
+    daily_cases = []
+
+    for case in daily_data:
+        case_year = parse_year(case["key"])
+        case_month = parse_month(case["key"])
+        case_day = parse_day(case["key"])
+
+        case_date = f"{case_year}-{case_month:02d}-{case_day:02d}"
+
+
+        positive = case["jumlah_positif"]["value"]
+        recovered = case["jumlah_sembuh"]["value"]
+        deaths = case["jumlah_meninggal"]["value"]
+
+        # active cases still in doubt because of negative value
+        active = case["jumlah_dirawat"]["value"]
+
+        daily_cases.append({
+            "date": case_date,
+            "positive": positive,
+            "recovered": recovered,
+            "deaths": deaths,
+            "active": active
+        })
+    
+    return daily_cases
+
+
+
+
+
+
 
 
