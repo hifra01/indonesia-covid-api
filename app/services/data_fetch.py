@@ -4,12 +4,12 @@ from datetime import datetime
 from functools import reduce
 from app.configs import datasource
 
-async def __get_case_data(session: aiohttp.ClientSession):
+async def get_case_data(session: aiohttp.ClientSession):
     async with session.get(datasource.case_update_url) as response:
         data = await response.json()
     return data
 
-async def __get_vaccine_data(session: aiohttp.ClientSession):
+async def get_vaccine_data(session: aiohttp.ClientSession):
     async with session.get(datasource.vaccine_update_url) as response:
         data = await response.json()
     return data
@@ -21,8 +21,8 @@ def __parse_year(key: int):
 async def fetch_total_data():
     
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
-        vaccine_data = await __get_vaccine_data(session)
+        case_data = await get_case_data(session)
+        vaccine_data = await get_vaccine_data(session)
 
     data = {
         "total_positive": case_data["update"]["total"]["jumlah_positif"],

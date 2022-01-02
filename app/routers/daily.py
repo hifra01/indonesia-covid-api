@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from typing import Optional
-from app.services.case_data import fetch_daily
+from app.services.daily_services import fetch_daily
+from app.validator.query_validator import validate_daily_format
 
 router = APIRouter()
 
@@ -9,11 +10,17 @@ async def get_daily_data(
     since: Optional[str] = None,
     upto: Optional[str] = None
 ):
-    case_data = await fetch_daily(since, upto)
+    if since is not None:
+        validate_daily_format(since)
+
+    if upto is not None:
+        validate_daily_format(upto)
+
+    data = await fetch_daily(since, upto)
     return {
         "ok": True,
         "message": "Data fetched successfully",
-        "data": case_data
+        "data": data
     }
 
 @router.get("/daily/{year}", tags=["daily"])

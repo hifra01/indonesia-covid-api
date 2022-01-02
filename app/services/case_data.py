@@ -3,15 +3,15 @@ import re
 
 from functools import reduce
 from app.configs import datasource
-from app.utils.utils import parse_year, parse_month, parse_day
+from app.utils.key_parser import parse_to_year_int, parse_to_month_int, parse_to_day_int
 
-async def __get_case_data(session: aiohttp.ClientSession):
+async def get_case_data(session: aiohttp.ClientSession):
     async with session.get(datasource.case_update_url) as response:
         data = await response.json()
     return data
 
 def __sum_data_on_year(year: int, cases):
-    cases_on_year = list(filter(lambda case: parse_year(case["key"]) == year, cases))
+    cases_on_year = list(filter(lambda case: parse_to_year_int(case["key"]) == year, cases))
     positive = sum([case["jumlah_positif"]["value"] for case in cases_on_year])
     recovered = sum([case["jumlah_sembuh"]["value"] for case in cases_on_year])
     deaths = sum([case["jumlah_meninggal"]["value"] for case in cases_on_year])
@@ -28,10 +28,10 @@ def __sum_data_on_year(year: int, cases):
     }
 
 def __collect_data_on_year(year: int, cases):
-    return list(filter(lambda case: parse_year(case["key"]) == year, cases))
+    return list(filter(lambda case: parse_to_year_int(case["key"]) == year, cases))
 
 def __collect_data_on_month(month: int, cases):
-    return list(filter(lambda case: parse_month(case["key"]) == month, cases))
+    return list(filter(lambda case: parse_to_month_int(case["key"]) == month, cases))
 
 def __sum_data_on_month(month: str, cases):
     splitted_month_str = month.split("-")
@@ -83,11 +83,11 @@ async def fetch_yearly(since, upto):
             yearly_upto = int(upto)
 
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
 
     daily_data = case_data["update"]["harian"]
 
-    years = set(map(lambda data: parse_year(data["key"]), daily_data))
+    years = set(map(lambda data: parse_to_year_int(data["key"]), daily_data))
 
     if yearly_since != None:
         years = list(filter(lambda year: year >= yearly_since, years))
@@ -106,7 +106,7 @@ async def fetch_yearly_on_year(year: str):
     year_int = int(year)
 
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
     
     daily_data = case_data["update"]["harian"]
 
@@ -114,7 +114,7 @@ async def fetch_yearly_on_year(year: str):
 
 async def fetch_monthly(since, upto):
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
     
     daily_data = case_data["update"]["harian"]
 
@@ -123,7 +123,7 @@ async def fetch_monthly(since, upto):
     months = sorted(
         set(
             map(
-                lambda data: str(f"{parse_year(data['key'])}-{parse_month(data['key']):02d}"),
+                lambda data: str(f"{parse_to_year_int(data['key'])}-{parse_to_month_int(data['key']):02d}"),
                 daily_data
             )
         )
@@ -136,18 +136,18 @@ async def fetch_monthly(since, upto):
 
 async def fetch_monthly_on_year(year, since, upto):
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
 
     case_year = int(year)
 
     daily_data = case_data["update"]["harian"]
 
-    cases_on_year = list(filter(lambda data: parse_year(data["key"]) == case_year, daily_data ))
+    cases_on_year = list(filter(lambda data: parse_to_year_int(data["key"]) == case_year, daily_data ))
 
     months = sorted(
         set(
             map(
-                lambda data: str(f"{parse_year(data['key'])}-{parse_month(data['key']):02d}"),
+                lambda data: str(f"{parse_to_year_int(data['key'])}-{parse_to_month_int(data['key']):02d}"),
                 cases_on_year
             )
         )
@@ -162,7 +162,7 @@ async def fetch_monthly_on_year(year, since, upto):
 
 async def fetch_monthly_on_year_month(year, month):
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
 
     daily_data = case_data["update"]["harian"]
 
@@ -170,8 +170,8 @@ async def fetch_monthly_on_year_month(year, month):
     case_month = int(month)
 
 
-    cases_on_year = list(filter(lambda data: parse_year(data["key"]) == case_year, daily_data ))
-    cases_on_month = list(filter(lambda data: parse_month(data["key"]) == case_month, cases_on_year ))
+    cases_on_year = list(filter(lambda data: parse_to_year_int(data["key"]) == case_year, daily_data ))
+    cases_on_month = list(filter(lambda data: parse_to_month_int(data["key"]) == case_month, cases_on_year ))
 
     month_string = f"{int(year)}-{int(month):02d}"
 
@@ -184,16 +184,16 @@ async def fetch_monthly_on_year_month(year, month):
 
 async def fetch_daily(since, upto):
     async with aiohttp.ClientSession() as session:
-        case_data = await __get_case_data(session)
+        case_data = await get_case_data(session)
 
     daily_data = case_data["update"]["harian"]
 
     daily_cases = []
 
     for case in daily_data:
-        case_year = parse_year(case["key"])
-        case_month = parse_month(case["key"])
-        case_day = parse_day(case["key"])
+        case_year = parse_to_year_int(case["key"])
+        case_month = parse_to_month_int(case["key"])
+        case_day = parse_to_day_int(case["key"])
 
         case_date = f"{case_year}-{case_month:02d}-{case_day:02d}"
 
