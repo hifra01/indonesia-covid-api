@@ -13,7 +13,7 @@ def validate_monthly_format(month_str: str):
     month_splitted = month_str.split(".")
     month = int(month_splitted[1])
     
-    if 1 <= month <= 12:
+    if month < 1 or month > 12:
         raise HTTPException(status_code=400, detail="Month can only be between 01 and 12")
 
 def validate_daily_format(date_str: str):
@@ -25,7 +25,7 @@ def validate_daily_format(date_str: str):
     month = int(date_splitted[1])
     date = int(date_splitted[2])
 
-    if 1 <= month <= 12:
+    if month < 1 or month > 12:
         raise HTTPException(status_code=400, detail="Month can only be between 01 and 12")
 
     try:
