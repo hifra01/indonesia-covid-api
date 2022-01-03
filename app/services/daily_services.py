@@ -2,8 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 from app.services.data_fetcher import daily_cases, daily_vaccines
 from app.utils.data_mapper import map_case_to_dict, map_vaccine_to_dict
-from app.utils.key_parser import parse_to_full_date_str, parse_to_year_int, parse_to_month_int
-from app.utils.query_parser import parse_full_date_to_milliseconds
+from app.utils.key_parser import parse_to_full_date_str
 from app.utils import data_filter
 
 async def fetch_daily(since, upto):

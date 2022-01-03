@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.services.data_fetcher import daily_cases, daily_vaccines
-from app.utils import query_parser, key_parser, data_filter
+from app.utils import key_parser, data_filter
 from app.utils.data_mapper import sum_case_to_dict, sum_vaccine_to_dict, map_year_month_tuple_to_str
 
 async def fetch_monthly(since, upto):
