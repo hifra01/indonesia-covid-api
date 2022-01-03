@@ -24,7 +24,7 @@ async def fetch_yearly(since, upto):
         )
 
     if upto is not None:
-        upto_int = int(since)
+        upto_int = int(upto)
         case_data = list(
             filter(
                 lambda data: key_parser.parse_to_year_int(data["key"]) <= upto_int,
