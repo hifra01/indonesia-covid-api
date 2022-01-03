@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from app.utils import key_parser, query_parser
 
 def yearly_since(since: str, data):
@@ -66,6 +67,37 @@ def data_on_month(month: int, data):
     filtered_data = list(
         filter(
             lambda x: key_parser.parse_to_month_int(x["key"]) == month,
+            data
+        )
+    )
+    return filtered_data
+
+def daily_since(since: str, data):
+    since_milliseconds = query_parser.parse_full_date_to_milliseconds(since)
+    filtered_data = list(
+        filter(
+            lambda x: x["key"] >= since_milliseconds,
+            data
+        )
+    )
+    return filtered_data
+
+def daily_upto(upto: str, data):
+    upto_milliseconds = query_parser.parse_full_date_to_milliseconds(upto)
+    filtered_data = list(
+        filter(
+            lambda x: x["key"] <= upto_milliseconds,
+            data
+        )
+    )
+    return filtered_data
+
+def data_on_full_date(year: int, month: int, day: int, data):
+    full_date_in_ms = int(datetime(year, month, day, tzinfo=timezone.utc).timestamp() * 1000)
+
+    filtered_data = list(
+        filter(
+            lambda x: x["key"] == full_date_in_ms,
             data
         )
     )
